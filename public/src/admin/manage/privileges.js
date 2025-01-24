@@ -264,24 +264,26 @@ define('admin/manage/privileges', [
 
 	Privileges.setPrivilege = (member, privilege, state) => api[state ? 'put' : 'del'](`/categories/${isNaN(cid) ? 0 : cid}/privileges/${encodeURIComponent(privilege)}`, { member });
 
+	// addUserToPriviligeTable refactored with help of ChatGPT
 	Privileges.addUserToPrivilegeTable = function () {
 		const modal = bootbox.dialog({
 			title: '[[admin/manage/categories:alert.find-user]]',
 			message: '<input class="form-control input-lg" placeholder="[[admin/manage/categories:alert.user-search]]" />',
 			show: true,
 		});
-
 		modal.on('shown.bs.modal', function () {
 			const inputEl = modal.find('input');
 			inputEl.focus();
-
-			autocomplete.user(inputEl, function (ev, ui) {
-				addUserToCategory(ui.item.user, function () {
-					modal.modal('hide');
-				});
-			});
+			// Separate callback for autocomplete
+			autocomplete.user(inputEl, handleAutocomplete.bind(null, modal));
 		});
 	};
+	function handleAutocomplete(modal, ev, ui) {
+		// Separate function for addUserToCategory callback
+		addUserToCategory(ui.item.user, function () {
+			modal.modal('hide');
+		});
+	}
 
 	Privileges.addGroupToPrivilegeTable = function () {
 		const modal = bootbox.dialog({
