@@ -285,30 +285,35 @@ define('admin/manage/privileges', [
 		});
 	}
 
+	// addGroupToPrivilegeTable refactored with help of ChatGPT
 	Privileges.addGroupToPrivilegeTable = function () {
 		const modal = bootbox.dialog({
 			title: '[[admin/manage/categories:alert.find-group]]',
 			message: '<input class="form-control input-lg" placeholder="[[admin/manage/categories:alert.group-search]]" />',
 			show: true,
 		});
-
 		modal.on('shown.bs.modal', function () {
 			const inputEl = modal.find('input');
 			inputEl.focus();
-
-			autocomplete.group(inputEl, function (ev, ui) {
-				if (ui.item.group.name === 'administrators') {
-					return alerts.alert({
-						type: 'warning',
-						message: '[[admin/manage/privileges:alert.admin-warning]]',
-					});
-				}
-				addGroupToCategory(ui.item.group.name, function () {
-					modal.modal('hide');
-				});
-			});
+			// Separate callback for autocomplete
+			autocomplete.group(inputEl, handleGroupAutocomplete.bind(null, modal));
 		});
 	};
+	// Extracted function for handling autocomplete logic
+	function handleGroupAutocomplete(modal, ev, ui) {
+		if (ui.item.group.name === 'administrators') {
+			return alerts.alert({
+				type: 'warning',
+				message: '[[admin/manage/privileges:alert.admin-warning]]',
+			});
+		}
+		// Separate function for addGroupToCategory callback
+		addGroupToCategory(ui.item.group.name, closeModal.bind(null, modal));
+	}
+	// Extracted function for closing the modal
+	function closeModal(modal) {
+		modal.modal('hide');
+	}
 
 	Privileges.copyPrivilegesToChildren = function (cid, group) {
 		const filter = getGroupPrivilegeFilter();
