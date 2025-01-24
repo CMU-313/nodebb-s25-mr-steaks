@@ -195,24 +195,39 @@ define('admin/manage/privileges', [
 		alerts.success('[[admin/manage/privileges:alert.discarded]]');
 	};
 
+	// Used ChatGPT to assist in refactoring
 	Privileges.refreshPrivilegeTable = function (groupToHighlight) {
-		api.get(`/categories/${cid}/privileges`, {}).then((privileges) => {
+		api.get(`/categories/${cid}/privileges`, {})
+			.then(updatePrivileges)
+			.catch(alert.error);
+		function updatePrivileges(privileges) {
 			ajaxify.data.privileges = { ...ajaxify.data.privileges, ...privileges };
 			const tpl = parseInt(cid, 10) ? 'admin/partials/privileges/category' : 'admin/partials/privileges/global';
 			const isAdminPriv = ajaxify.currentPage.endsWith('admin/manage/privileges/admin');
-			app.parseAndTranslate(tpl, { privileges, isAdminPriv }).then((html) => {
-				// Get currently selected filters
-				const btnIndices = $('.privilege-filters button.btn-warning').map((idx, el) => $(el).index()).get();
-				$('.privilege-table-container').html(html);
-				Privileges.exposeAssumedPrivileges();
-				document.querySelectorAll('.privilege-filters').forEach((con, i) => {
-					const idx = btnIndices[i] === undefined ? 0 : btnIndices[i];
-					con.querySelectorAll('button')[idx].click();
-				});
-
-				hightlightRowByDataAttr('data-group-name', groupToHighlight);
+			app.parseAndTranslate(tpl, { privileges, isAdminPriv })
+				.then(html => renderPrivilegeTable(html, groupToHighlight))
+				.catch(alert.error);
+		}
+		function renderPrivilegeTable(html, groupToHighlight) {
+			// Get currently selected filters
+			const btnIndices = getSelectedFilters();
+			updatePrivilegeTable(html);
+			Privileges.exposeAssumedPrivileges();
+			reapplyFilters(btnIndices);
+			hightlightRowByDataAttr('data-group-name', groupToHighlight);
+		}
+		function getSelectedFilters() {
+			return $('.privilege-filters button.btn-warning').map((idx, el) => $(el).index()).get();
+		}
+		function updatePrivilegeTable(html) {
+			$('.privilege-table-container').html(html);
+		}
+		function reapplyFilters(btnIndices) {
+			document.querySelectorAll('.privilege-filters').forEach((con, i) => {
+				const idx = btnIndices[i] === undefined ? 0 : btnIndices[i];
+				con.querySelectorAll('button')[idx].click();
 			});
-		}).catch(alert.error);
+		}
 	};
 
 	Privileges.exposeAssumedPrivileges = function () {
