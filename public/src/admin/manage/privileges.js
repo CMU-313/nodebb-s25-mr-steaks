@@ -19,6 +19,7 @@ define('admin/manage/privileges', [
 	let cid;
 
 	Privileges.init = function () {
+		console.log('Init');
 		cid = isNaN(parseInt(ajaxify.data.selectedCategory.cid, 10)) ? 'admin' : ajaxify.data.selectedCategory.cid;
 
 		checkboxRowSelector.init('.privilege-table-container');
@@ -36,12 +37,13 @@ define('admin/manage/privileges', [
 		});
 
 		Privileges.setupPrivilegeTable();
-
+		console.log('Success?');
 		highlightRow();
 		$('.privilege-filters button:first-child').click();
 	};
 
 	Privileges.setupPrivilegeTable = function () {
+		console.log('Setup');
 		$('.privilege-table-container').on('change', 'input[type="checkbox"]:not(.checkbox-helper)', function () {
 			const checkboxEl = this;
 			const $checkboxEl = $(this);
@@ -197,6 +199,7 @@ define('admin/manage/privileges', [
 
 	// Used ChatGPT to assist in refactoring
 	Privileges.refreshPrivilegeTable = function (groupToHighlight) {
+		console.log('Baron Niu');
 		api.get(`/categories/${cid}/privileges`, {})
 			.then(updatePrivileges)
 			.catch(alert.error);
@@ -266,6 +269,7 @@ define('admin/manage/privileges', [
 
 	// addUserToPriviligeTable refactored with help of ChatGPT
 	Privileges.addUserToPrivilegeTable = function () {
+		console.log('Baron Niu');
 		const modal = bootbox.dialog({
 			title: '[[admin/manage/categories:alert.find-user]]',
 			message: '<input class="form-control input-lg" placeholder="[[admin/manage/categories:alert.user-search]]" />',
@@ -287,6 +291,7 @@ define('admin/manage/privileges', [
 
 	// addGroupToPrivilegeTable refactored with help of ChatGPT
 	Privileges.addGroupToPrivilegeTable = function () {
+		console.log('Baron Niu');
 		const modal = bootbox.dialog({
 			title: '[[admin/manage/categories:alert.find-group]]',
 			message: '<input class="form-control input-lg" placeholder="[[admin/manage/categories:alert.group-search]]" />',
