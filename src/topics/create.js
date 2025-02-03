@@ -104,13 +104,7 @@ module.exports = function (Topics) {
 			}
 		}
 
-		if (!categoryExists) {
-			throw new Error('[[error:no-category]]');
-		}
-
-		if (!canCreate || (!canTag && data.tags.length)) {
-			throw new Error('[[error:no-privileges]]');
-		}
+		validateCategoryAndPermissions(categoryExists, canCreate, canTag, data.tags);
 
 		await guestHandleValid(data);
 		if (!data.fromQueue) {
@@ -158,6 +152,16 @@ module.exports = function (Topics) {
 			postData: postData,
 		};
 	};
+
+	function validateCategoryAndPermissions(categoryExists, canCreate, canTag, tags) {
+		if (!categoryExists) {
+			throw new Error('[[error:no-category]]');
+		}
+
+		if (!canCreate || (!canTag && tags.length)) {
+			throw new Error('[[error:no-privileges]]');
+		}
+	}
 
 	async function sendTopicNotifications(uid, topicData, postData) {
 		if (parseInt(uid, 10) && !topicData.scheduled) {
