@@ -151,17 +151,21 @@ module.exports = function (Topics) {
 		analytics.increment(['topics', `topics:byCid:${topicData.cid}`]);
 		plugins.hooks.fire('action:topic.post', { topic: topicData, post: postData, data: data });
 
-		if (parseInt(uid, 10) && !topicData.scheduled) {
-			user.notifications.sendTopicNotificationToFollowers(uid, topicData, postData);
-			Topics.notifyTagFollowers(postData, uid);
-			categories.notifyCategoryFollowers(postData, uid);
-		}
+		await sendTopicNotifications(uid, topicData, postData);
 
 		return {
 			topicData: topicData,
 			postData: postData,
 		};
 	};
+
+	async function sendTopicNotifications(uid, topicData, postData) {
+		if (parseInt(uid, 10) && !topicData.scheduled) {
+			await user.notifications.sendTopicNotificationToFollowers(uid, topicData, postData);
+			await Topics.notifyTagFollowers(postData, uid);
+			await categories.notifyCategoryFollowers(postData, uid);
+		}
+	}
 
 	Topics.reply = async function (data) {
 		data = await plugins.hooks.fire('filter:topic.reply', data);
