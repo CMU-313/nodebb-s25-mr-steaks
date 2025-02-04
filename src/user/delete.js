@@ -208,13 +208,17 @@ module.exports = function (User) {
 			db.getSortedSetRange(`following:${uid}`, 0, -1),
 		]);
 
+		async function batchProcess(uids, name, fieldName) {
+			const counts = await db.sortedSetsCard(uids.map(uid => name + uid));
+			const bulkSet = counts.map(
+				(count, index) => ([`user:${uids[index]}`, { [fieldName]: count || 0 }])
+			);
+			await db.setObjectBulk(bulkSet);
+		}
+
 		async function updateCount(uids, name, fieldName) {
 			await batch.processArray(uids, async (uids) => {
-				const counts = await db.sortedSetsCard(uids.map(uid => name + uid));
-				const bulkSet = counts.map(
-					(count, index) => ([`user:${uids[index]}`, { [fieldName]: count || 0 }])
-				);
-				await db.setObjectBulk(bulkSet);
+				await batchProcess(uids, name, fieldName);
 			}, {
 				batch: 500,
 			});
