@@ -96,44 +96,40 @@ module.exports = function (User) {
 		return defaultValue;
 	}
 
-	User.saveSettings = async function (uid, data) {
-		const maxPostsPerPage = meta.config.maxPostsPerPage || 20;
-		if (
-			!data.postsPerPage ||
-			parseInt(data.postsPerPage, 10) <= 1 ||
-			parseInt(data.postsPerPage, 10) > maxPostsPerPage
-		) {
-			throw new Error(`[[error:invalid-pagination-value, 2, ${maxPostsPerPage}]]`);
+	// Refactored using chatgpt
+	async function validatePagination(value, maxValue) {
+		const parsed = parseInt(value, 10);
+		if (!value || parsed <= 1 || parsed > maxValue) {
+			throw new Error(`[[error:invalid-pagination-value, 2, ${maxValue}]]`);
 		}
+	}
 
-		const maxTopicsPerPage = meta.config.maxTopicsPerPage || 20;
-		if (
-			!data.topicsPerPage ||
-			parseInt(data.topicsPerPage, 10) <= 1 ||
-			parseInt(data.topicsPerPage, 10) > maxTopicsPerPage
-		) {
-			throw new Error(`[[error:invalid-pagination-value, 2, ${maxTopicsPerPage}]]`);
-		}
-
+	async function validateLanguages(data, defaultLang) {
 		const languageCodes = await languages.listCodes();
+
 		if (data.userLang && !languageCodes.includes(data.userLang)) {
 			throw new Error('[[error:invalid-language]]');
 		}
 		if (data.acpLang && !languageCodes.includes(data.acpLang)) {
 			throw new Error('[[error:invalid-language]]');
 		}
-		data.userLang = data.userLang || meta.config.defaultLang;
 
-		plugins.hooks.fire('action:user.saveSettings', { uid: uid, settings: data });
+		// Fall back to default language if none specified
+		data.userLang = data.userLang || defaultLang;
+	}
 
-		const settings = {
+	function buildSettings(data, meta) {
+		const maxPostsPerPage = parseInt(meta.config.maxPostsPerPage || 20, 10);
+		const maxTopicsPerPage = parseInt(meta.config.maxTopicsPerPage || 20, 10);
+
+		return {
 			showemail: data.showemail,
 			showfullname: data.showfullname,
 			openOutgoingLinksInNewTab: data.openOutgoingLinksInNewTab,
 			dailyDigestFreq: data.dailyDigestFreq || 'off',
 			usePagination: data.usePagination,
-			topicsPerPage: Math.min(data.topicsPerPage, parseInt(maxTopicsPerPage, 10) || 20),
-			postsPerPage: Math.min(data.postsPerPage, parseInt(maxPostsPerPage, 10) || 20),
+			topicsPerPage: Math.min(data.topicsPerPage, maxTopicsPerPage),
+			postsPerPage: Math.min(data.postsPerPage, maxPostsPerPage),
 			userLang: data.userLang || meta.config.defaultLang,
 			acpLang: data.acpLang || meta.config.defaultLang,
 			followTopicsOnCreate: data.followTopicsOnCreate,
@@ -141,7 +137,8 @@ module.exports = function (User) {
 			restrictChat: data.restrictChat,
 			topicSearchEnabled: data.topicSearchEnabled,
 			updateUrlWithPostIndex: data.updateUrlWithPostIndex,
-			homePageRoute: ((data.homePageRoute === 'custom' ? data.homePageCustom : data.homePageRoute) || '').replace(/^\//, ''),
+			homePageRoute: ((data.homePageRoute === 'custom' ? data.homePageCustom : data.homePageRoute) || '')
+				.replace(/^\//, ''),
 			scrollToMyPost: data.scrollToMyPost,
 			upvoteNotifFreq: data.upvoteNotifFreq,
 			bootswatchSkin: data.bootswatchSkin,
@@ -149,17 +146,36 @@ module.exports = function (User) {
 			categoryTopicSort: data.categoryTopicSort,
 			topicPostSort: data.topicPostSort,
 		};
+	}
+
+	User.saveSettings = async function (uid, data) {
+		const maxPostsPerPage = meta.config.maxPostsPerPage || 20;
+		const maxTopicsPerPage = meta.config.maxTopicsPerPage || 20;
+
+		await validatePagination(data.postsPerPage, maxPostsPerPage);
+		await validatePagination(data.topicsPerPage, maxTopicsPerPage);
+
+		await validateLanguages(data, meta.config.defaultLang);
+
+		// Fire action hook before building final settings
+		plugins.hooks.fire('action:user.saveSettings', { uid, settings: data });
+
+		const settings = buildSettings(data, meta);
+
 		const notificationTypes = await notifications.getAllNotificationTypes();
 		notificationTypes.forEach((notificationType) => {
 			if (data[notificationType]) {
 				settings[notificationType] = data[notificationType];
 			}
 		});
+
 		const result = await plugins.hooks.fire('filter:user.saveSettings', { uid: uid, settings: settings, data: data });
 		await db.setObject(`user:${uid}:settings`, result.settings);
 		await User.updateDigestSetting(uid, data.dailyDigestFreq);
+		console.log('alvin tang');
 		return await User.getSettings(uid);
 	};
+
 
 	User.updateDigestSetting = async function (uid, dailyDigestFreq) {
 		await db.sortedSetsRemove(['digest:day:uids', 'digest:week:uids', 'digest:month:uids'], uid);
