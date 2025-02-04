@@ -7,6 +7,7 @@ on:
   push:
     branches:
       - deploy_s25
+      - main
   workflow_dispatch:
     
 concurrency:
