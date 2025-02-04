@@ -195,24 +195,40 @@ define('admin/manage/privileges', [
 		alerts.success('[[admin/manage/privileges:alert.discarded]]');
 	};
 
+	// Used ChatGPT to assist in refactoring
 	Privileges.refreshPrivilegeTable = function (groupToHighlight) {
-		api.get(`/categories/${cid}/privileges`, {}).then((privileges) => {
+		console.log('Baron Niu');
+		api.get(`/categories/${cid}/privileges`, {})
+			.then(updatePrivileges)
+			.catch(alert.error);
+		function updatePrivileges(privileges) {
 			ajaxify.data.privileges = { ...ajaxify.data.privileges, ...privileges };
 			const tpl = parseInt(cid, 10) ? 'admin/partials/privileges/category' : 'admin/partials/privileges/global';
 			const isAdminPriv = ajaxify.currentPage.endsWith('admin/manage/privileges/admin');
-			app.parseAndTranslate(tpl, { privileges, isAdminPriv }).then((html) => {
-				// Get currently selected filters
-				const btnIndices = $('.privilege-filters button.btn-warning').map((idx, el) => $(el).index()).get();
-				$('.privilege-table-container').html(html);
-				Privileges.exposeAssumedPrivileges();
-				document.querySelectorAll('.privilege-filters').forEach((con, i) => {
-					const idx = btnIndices[i] === undefined ? 0 : btnIndices[i];
-					con.querySelectorAll('button')[idx].click();
-				});
-
-				hightlightRowByDataAttr('data-group-name', groupToHighlight);
+			app.parseAndTranslate(tpl, { privileges, isAdminPriv })
+				.then(html => renderPrivilegeTable(html, groupToHighlight))
+				.catch(alert.error);
+		}
+		function renderPrivilegeTable(html, groupToHighlight) {
+			// Get currently selected filters
+			const btnIndices = getSelectedFilters();
+			updatePrivilegeTable(html);
+			Privileges.exposeAssumedPrivileges();
+			reapplyFilters(btnIndices);
+			hightlightRowByDataAttr('data-group-name', groupToHighlight);
+		}
+		function getSelectedFilters() {
+			return $('.privilege-filters button.btn-warning').map((idx, el) => $(el).index()).get();
+		}
+		function updatePrivilegeTable(html) {
+			$('.privilege-table-container').html(html);
+		}
+		function reapplyFilters(btnIndices) {
+			document.querySelectorAll('.privilege-filters').forEach((con, i) => {
+				const idx = btnIndices[i] === undefined ? 0 : btnIndices[i];
+				con.querySelectorAll('button')[idx].click();
 			});
-		}).catch(alert.error);
+		}
 	};
 
 	Privileges.exposeAssumedPrivileges = function () {
@@ -249,49 +265,58 @@ define('admin/manage/privileges', [
 
 	Privileges.setPrivilege = (member, privilege, state) => api[state ? 'put' : 'del'](`/categories/${isNaN(cid) ? 0 : cid}/privileges/${encodeURIComponent(privilege)}`, { member });
 
+	// addUserToPriviligeTable refactored with help of ChatGPT
 	Privileges.addUserToPrivilegeTable = function () {
+		console.log('Baron Niu');
 		const modal = bootbox.dialog({
 			title: '[[admin/manage/categories:alert.find-user]]',
 			message: '<input class="form-control input-lg" placeholder="[[admin/manage/categories:alert.user-search]]" />',
 			show: true,
 		});
-
 		modal.on('shown.bs.modal', function () {
 			const inputEl = modal.find('input');
 			inputEl.focus();
-
-			autocomplete.user(inputEl, function (ev, ui) {
-				addUserToCategory(ui.item.user, function () {
-					modal.modal('hide');
-				});
-			});
+			// Separate callback for autocomplete
+			autocomplete.user(inputEl, handleAutocomplete.bind(null, modal));
 		});
 	};
+	function handleAutocomplete(modal, ev, ui) {
+		// Separate function for addUserToCategory callback
+		addUserToCategory(ui.item.user, function () {
+			modal.modal('hide');
+		});
+	}
 
+	// addGroupToPrivilegeTable refactored with help of ChatGPT
 	Privileges.addGroupToPrivilegeTable = function () {
+		console.log('Baron Niu');
 		const modal = bootbox.dialog({
 			title: '[[admin/manage/categories:alert.find-group]]',
 			message: '<input class="form-control input-lg" placeholder="[[admin/manage/categories:alert.group-search]]" />',
 			show: true,
 		});
-
 		modal.on('shown.bs.modal', function () {
 			const inputEl = modal.find('input');
 			inputEl.focus();
-
-			autocomplete.group(inputEl, function (ev, ui) {
-				if (ui.item.group.name === 'administrators') {
-					return alerts.alert({
-						type: 'warning',
-						message: '[[admin/manage/privileges:alert.admin-warning]]',
-					});
-				}
-				addGroupToCategory(ui.item.group.name, function () {
-					modal.modal('hide');
-				});
-			});
+			// Separate callback for autocomplete
+			autocomplete.group(inputEl, handleGroupAutocomplete.bind(null, modal));
 		});
 	};
+	// Extracted function for handling autocomplete logic
+	function handleGroupAutocomplete(modal, ev, ui) {
+		if (ui.item.group.name === 'administrators') {
+			return alerts.alert({
+				type: 'warning',
+				message: '[[admin/manage/privileges:alert.admin-warning]]',
+			});
+		}
+		// Separate function for addGroupToCategory callback
+		addGroupToCategory(ui.item.group.name, closeModal.bind(null, modal));
+	}
+	// Extracted function for closing the modal
+	function closeModal(modal) {
+		modal.modal('hide');
+	}
 
 	Privileges.copyPrivilegesToChildren = function (cid, group) {
 		const filter = getGroupPrivilegeFilter();
