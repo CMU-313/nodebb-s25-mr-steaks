@@ -146,6 +146,11 @@ define('forum/topic/threadTools', [
 			changeWatching('ignore');
 		});
 
+		topicContainer.on('click', '[component="thread/resolve"] .dropdown-item', function (event) {
+			let currState = $(this).attr("data-status");
+			ThreadTools.setResolveState(currState);
+		});
+
 		function changeWatching(type, state = 1) {
 			const method = state ? 'put' : 'del';
 			api[method](`/topics/${tid}/${type}`, {}, () => {
@@ -318,6 +323,14 @@ define('forum/topic/threadTools', [
 		ajaxify.data.locked = data.isLocked;
 
 		posts.addTopicEvents(data.events);
+	};
+
+	ThreadTools.setResolveState = function (state) {
+		const resolveFeature = components.get('thread/resolve');
+		resolveFeature.find('button span').text(state);
+	
+		resolveFeature.find('i').removeClass('fa-check');
+		resolveFeature.find(`.dropdown-item[data-status="${state}"] i`).addClass('fa-check');
 	};
 
 	ThreadTools.setDeleteState = function (data) {
