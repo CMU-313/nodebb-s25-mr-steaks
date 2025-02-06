@@ -9,6 +9,7 @@
 				</button>
 				{{{ end }}}
 
+				<!-- IMPORT partials/topic/resolved.tpl -->
 				<!-- IMPORT partials/topic/watch.tpl -->
 				<!-- IMPORT partials/topic/sort.tpl -->
 				<!-- IMPORT partials/topic/tools.tpl -->
