@@ -134,6 +134,7 @@ module.exports = function (Topics) {
 		}
 		const topicData = topics[0];
 		topicData.unreplied = true;
+		topicData.resolved = false;
 		topicData.mainPost = postData;
 		topicData.index = 0;
 		postData.index = 0;
