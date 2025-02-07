@@ -20,6 +20,19 @@ require('./topics/infinitescroll')(SocketTopics);
 require('./topics/tags')(SocketTopics);
 require('./topics/merge')(SocketTopics);
 
+SocketTopics.setResolved = async function (socket, data) {
+	const isResolved = data.status === 'Resolved' ? 1 : 0;
+	await db.setObjectField(`topic:${data.tid}`, 'resolved', isResolved);
+	return { success: true, resolved: isResolved };
+};
+
+SocketTopics.getResolved = async function (socket, data) {
+    const resolvedVal = await db.getObjectField(`topic:${data.tid}`, 'resolved');
+    const isResolved = parseInt(resolvedVal, 10) === 1;
+    return { success: true, resolved: isResolved };
+};
+
+
 SocketTopics.postcount = async function (socket, tid) {
 	const canRead = await privileges.topics.can('topics:read', tid, socket.uid);
 	if (!canRead) {

@@ -16,6 +16,14 @@ define('forum/topic/threadTools', [
 	const ThreadTools = {};
 
 	ThreadTools.init = function (tid, topicContainer) {
+		socket.emit('topics.getResolved', { tid: tid }, function (err, result) {
+			if (!err && result && result.resolved) {
+				ThreadTools.setResolveState('Resolved');
+			} else {
+				ThreadTools.setResolveState('Unresolved');
+			}
+		});
+		
 		renderMenu(topicContainer);
 
 		$('.topic-main-buttons [title]').tooltip({
@@ -146,9 +154,11 @@ define('forum/topic/threadTools', [
 			changeWatching('ignore');
 		});
 
-		topicContainer.on('click', '[component="thread/resolve"] .dropdown-item', function (event) {
-			let currState = $(this).attr("data-status");
-			ThreadTools.setResolveState(currState);
+		topicContainer.on('click', '[component="thread/resolve"] .dropdown-item', function () {
+			const currState = $(this).attr("data-status");
+			socket.emit('topics.setResolved', { tid: ajaxify.data.tid, status: currState }, function() {
+				ThreadTools.setResolveState(currState);
+			});
 		});
 
 		function changeWatching(type, state = 1) {
