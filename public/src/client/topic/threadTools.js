@@ -16,6 +16,14 @@ define('forum/topic/threadTools', [
 	const ThreadTools = {};
 
 	ThreadTools.init = function (tid, topicContainer) {
+		socket.emit('topics.getResolved', { tid: tid }, function (err, result) {
+			if (!err && result && result.resolved) {
+				ThreadTools.setResolveState('Resolved');
+			} else {
+				ThreadTools.setResolveState('Unresolved');
+			}
+		});
+
 		renderMenu(topicContainer);
 
 		$('.topic-main-buttons [title]').tooltip({
@@ -144,6 +152,13 @@ define('forum/topic/threadTools', [
 		});
 		topicContainer.on('click', '[component="topic/ignoring"]', function () {
 			changeWatching('ignore');
+		});
+
+		topicContainer.on('click', '[component="thread/resolve"] .dropdown-item', function () {
+			const currState = $(this).attr('data-status');
+			socket.emit('topics.setResolved', { tid: ajaxify.data.tid, status: currState }, function () {
+				ThreadTools.setResolveState(currState);
+			});
 		});
 
 		function changeWatching(type, state = 1) {
@@ -318,6 +333,14 @@ define('forum/topic/threadTools', [
 		ajaxify.data.locked = data.isLocked;
 
 		posts.addTopicEvents(data.events);
+	};
+
+	ThreadTools.setResolveState = function (state) {
+		const resolveFeature = components.get('thread/resolve');
+		resolveFeature.find('button span').text(state);
+
+		resolveFeature.find('i').removeClass('fa-check');
+		resolveFeature.find(`.dropdown-item[data-status="${state}"] i`).addClass('fa-check');
 	};
 
 	ThreadTools.setDeleteState = function (data) {
