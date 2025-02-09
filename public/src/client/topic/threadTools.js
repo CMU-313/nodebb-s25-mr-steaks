@@ -23,7 +23,7 @@ define('forum/topic/threadTools', [
 				ThreadTools.setResolveState('Unresolved');
 			}
 		});
-		
+
 		renderMenu(topicContainer);
 
 		$('.topic-main-buttons [title]').tooltip({
@@ -155,8 +155,8 @@ define('forum/topic/threadTools', [
 		});
 
 		topicContainer.on('click', '[component="thread/resolve"] .dropdown-item', function () {
-			const currState = $(this).attr("data-status");
-			socket.emit('topics.setResolved', { tid: ajaxify.data.tid, status: currState }, function() {
+			const currState = $(this).attr('data-status');
+			socket.emit('topics.setResolved', { tid: ajaxify.data.tid, status: currState }, function () {
 				ThreadTools.setResolveState(currState);
 			});
 		});
@@ -338,7 +338,7 @@ define('forum/topic/threadTools', [
 	ThreadTools.setResolveState = function (state) {
 		const resolveFeature = components.get('thread/resolve');
 		resolveFeature.find('button span').text(state);
-	
+
 		resolveFeature.find('i').removeClass('fa-check');
 		resolveFeature.find(`.dropdown-item[data-status="${state}"] i`).addClass('fa-check');
 	};

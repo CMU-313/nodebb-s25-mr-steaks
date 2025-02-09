@@ -27,9 +27,9 @@ SocketTopics.setResolved = async function (socket, data) {
 };
 
 SocketTopics.getResolved = async function (socket, data) {
-    const resolvedVal = await db.getObjectField(`topic:${data.tid}`, 'resolved');
-    const isResolved = parseInt(resolvedVal, 10) === 1;
-    return { success: true, resolved: isResolved };
+	const resolvedVal = await db.getObjectField(`topic:${data.tid}`, 'resolved');
+	const isResolved = parseInt(resolvedVal, 10) === 1;
+	return { success: true, resolved: isResolved };
 };
 
 
