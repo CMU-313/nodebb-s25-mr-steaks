@@ -367,6 +367,16 @@ define('composer', [
 			});
 		});
 
+		postContainer.find('.formatting-bar [data-action="anonymous"]').on('click', function (e) {
+			const anonText = this.querySelector('.anon-text');
+			const nonAnonText = this.querySelector('.non-anon-text');
+
+			anonText.classList.toggle('hide', !postData.isAnonymous);
+			nonAnonText.classList.toggle('hide', postData.isAnonymous);
+
+			postData.isAnonymous = !postData.isAnonymous;
+		})
+
 		postContainer.find('.composer-discard').on('click', function (e) {
 			e.preventDefault();
 
@@ -493,6 +503,7 @@ define('composer', [
 		}
 
 		postData.mobile = composer.bsEnvironment === 'xs' || composer.bsEnvironment === 'sm';
+		postData.isAnonymous = false;
 
 		({ postData, createData: data } = await hooks.fire('filter:composer.create', {
 			postData: postData,
