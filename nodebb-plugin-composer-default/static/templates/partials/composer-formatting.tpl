@@ -62,8 +62,8 @@
 		<!-- Anonymous Toggle Button -->
 		<button class="btn btn-sm btn-link py-2 text-body fw-semibold text-nowrap" data-action="anonymous">
 			<i class="fa fa-user-secret"></i>
-			<span class="d-none d-md-inline show-text">Post as Anonymous</span>
-			<span class="d-none d-md-inline hide-text hide">Post with Name</span>
+			<span class="d-none d-md-inline anon-text">Post as Anonymous</span>
+			<span class="d-none d-md-inline non-anon-text hide">Post with Name</span>
 		</button>
 		<button class="btn btn-sm btn-link py-2 text-body fw-semibold text-nowrap" data-action="preview">
 			<i class="fa fa-eye"></i>
