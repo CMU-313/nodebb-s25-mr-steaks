@@ -17,7 +17,7 @@
 	<meta itemprop="datePublished" content="{timestampISO}">
 	<meta itemprop="dateModified" content="{lastposttimeISO}">
 	<div itemprop="author" itemscope itemtype="https://schema.org/Person">
-		<meta itemprop="name" content="{author.username}">
+	<meta itemprop="name" content="{{{ if author.username }}}{author.username}{{{ else }}}Anonymous{{{ end }}}">
 		{{{ if author.userslug }}}<meta itemprop="url" content="{config.relative_path}/user/{author.userslug}">{{{ end }}}
 	</div>
 

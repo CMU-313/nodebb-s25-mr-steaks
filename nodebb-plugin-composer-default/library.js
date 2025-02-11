@@ -158,6 +158,15 @@ plugin.filterComposerBuild = async function (hookData) {
 		canSchedule(req),
 	]);
 
+	// ADD THIS ANONYMOUS CHECK HERE
+	const isAnonymous = req.query.anonymous === '1' || postData.isAnonymous === true || postData.isAnonymous === 'true';
+	postData.isAnonymous = isAnonymous;
+	
+	if (isAnonymous) {
+		postData.uid = 0; // Assign post to guest user
+		console.log("Anonymous post detected!");
+	}
+
 	const isEditing = !!req.query.pid;
 	const isGuestPost = postData && parseInt(postData.uid, 10) === 0;
 	const save_id = utils.generateSaveId(req.uid);
@@ -187,6 +196,7 @@ plugin.filterComposerBuild = async function (hookData) {
 			action: action,
 			toPid: parseInt(req.query.toPid, 10),
 			discardRoute: discardRoute,
+			isAnonymous: isAnonymous,
 
 			resizable: false,
 			allowTopicsThumbnail: parseInt(meta.config.allowTopicsThumbnail, 10) === 1 && isMain,

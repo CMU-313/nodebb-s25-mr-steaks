@@ -9,7 +9,11 @@ const plugins = require.main.require('./src/plugins');
 const Sockets = module.exports;
 
 Sockets.push = async function (socket, pid) {
-	const canRead = await privileges.posts.can('topics:read', pid, socket.uid);
+	console.log(`[Sockets.push] Called with pid: ${pid}, uid: ${socket.uid}`);
+	// const canRead = await privileges.posts.can('topics:read', pid, socket.uid);
+	//guests have perms
+	const canRead = await privileges.posts.can('topics:read', pid, socket.uid) || socket.uid === 0;
+
 	if (!canRead) {
 		throw new Error('[[error:no-privileges]]');
 	}
@@ -73,7 +77,12 @@ Sockets.shouldQueue = async function (socket, data) {
 	if (!data || !data.postData) {
 		throw new Error('[[error:invalid-data]]');
 	}
-	if (socket.uid <= 0) {
+	// if (socket.uid <= 0) {
+	// 	return false;
+	// }
+	//Allows anonymous to post
+	const isAnonymous = data.postData.isAnonymous === true || data.postData.isAnonymous === 'true';
+	if (!socket.uid && !isAnonymous) {
 		return false;
 	}
 
