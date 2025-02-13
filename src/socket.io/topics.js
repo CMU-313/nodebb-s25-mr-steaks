@@ -32,6 +32,21 @@ SocketTopics.getResolved = async function (socket, data) {
 	return { success: true, resolved: isResolved };
 };
 
+SocketTopics.sameQuestionCount = async function (socket, data) {
+	const sameQCount = await db.getObjectField(`topic:${data.tid}`, 'sameQuestionCount') || 0;
+	return { success: true, sameQCount };
+}
+
+SocketTopics.increaseSameQCount = async function (socket, data) {
+	const canRead = await privileges.topics.can('topics:read', data.tid, socket.uid);
+	if (!canRead) {
+		throw new Error('[[no-privileges]]');
+	}
+	let currCount = await db.getObjectField(`topic:${data.tid}`, 'sameQuestionCount') || 0;
+    currCount = parseInt(currCount, 10) + 1;
+	await db.setObjectField(`topic:${data.tid}`, 'sameQuestionCount', currCount);
+	return { success: true, currCount };
+}
 
 SocketTopics.postcount = async function (socket, tid) {
 	const canRead = await privileges.topics.can('topics:read', tid, socket.uid);

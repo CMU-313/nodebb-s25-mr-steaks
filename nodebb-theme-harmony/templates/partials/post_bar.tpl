@@ -10,7 +10,7 @@
 				<button id="sameQuestion" class="btn-ghost-sm ff-secondary d-flex gap-2 align-items-center">
 					<i class="fa fa-hand-paper text-primary"></i>
 					<span class="d-none d-md-inline fw-semibold">Same Question</span>
-					<span id="same-question-count" class="badge bg-primary text-light ms-2 px-2 py-1 rounded-circle">0</span>
+					<span id="sameQuestionCount" class="badge bg-primary text-light ms-2 px-2 py-1 rounded-circle">0</span>
 				</button>
 				{{{ end }}}
 

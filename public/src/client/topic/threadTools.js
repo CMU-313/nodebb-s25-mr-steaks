@@ -24,6 +24,12 @@ define('forum/topic/threadTools', [
 			}
 		});
 
+		socket.emit('topics.sameQuestionCount', { tid }, function (err, result) {
+            if (!err && result.success) {
+                document.getElementById('sameQuestionCount').textContent = result.sameQCount;
+            }
+        });
+
 		renderMenu(topicContainer);
 
 		$('.topic-main-buttons [title]').tooltip({
@@ -158,6 +164,12 @@ define('forum/topic/threadTools', [
 			const currState = $(this).attr('data-status');
 			socket.emit('topics.setResolved', { tid: ajaxify.data.tid, status: currState }, function () {
 				ThreadTools.setResolveState(currState);
+			});
+		});
+
+		topicContainer.on('click', '#sameQuestion', function () {
+			socket.emit('topics.increaseSameQCount', { tid }, function (err, result) {
+				document.getElementById('sameQuestionCount').textContent = result.currCount;
 			});
 		});
 
