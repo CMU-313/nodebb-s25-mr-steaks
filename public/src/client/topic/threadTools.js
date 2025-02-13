@@ -27,6 +27,10 @@ define('forum/topic/threadTools', [
 		socket.emit('topics.sameQuestionCount', { tid }, function (err, result) {
             if (!err && result.success) {
                 document.getElementById('sameQuestionCount').textContent = result.sameQCount;
+				if (result.hasClicked) {
+                    button.disabled = true;
+                    button.classList.add('disabled');
+				}
             }
         });
 
@@ -169,7 +173,11 @@ define('forum/topic/threadTools', [
 
 		topicContainer.on('click', '#sameQuestion', function () {
 			socket.emit('topics.increaseSameQCount', { tid }, function (err, result) {
-				document.getElementById('sameQuestionCount').textContent = result.currCount;
+				if (!err && result.success) {
+					document.getElementById('sameQuestionCount').textContent = result.currCount;
+					button.disabled = true;
+					button.classList.add('disabled');
+				}
 			});
 		});
 

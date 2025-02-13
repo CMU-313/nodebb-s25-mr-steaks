@@ -34,7 +34,11 @@ SocketTopics.getResolved = async function (socket, data) {
 
 SocketTopics.sameQuestionCount = async function (socket, data) {
 	const sameQCount = await db.getObjectField(`topic:${data.tid}`, 'sameQuestionCount') || 0;
-	return { success: true, sameQCount };
+	let clickedUsers = await db.getObjectField(`topic:${data.tid}`, 'sameQuestionUsers') || "[]";
+    clickedUsers = JSON.parse(clickedUsers);
+    const hasClicked = clickedUsers.includes(socket.uid);
+
+    return { success: true, sameQCount, hasClicked };
 }
 
 SocketTopics.increaseSameQCount = async function (socket, data) {
@@ -42,6 +46,16 @@ SocketTopics.increaseSameQCount = async function (socket, data) {
 	if (!canRead) {
 		throw new Error('[[no-privileges]]');
 	}
+	let clickedUsers = await db.getObjectField(`topic:${data.tid}`, 'sameQuestionUsers') || "[]";
+    clickedUsers = JSON.parse(clickedUsers);
+
+    if (clickedUsers.includes(socket.uid)) {
+        return { success: false, message: 'Already clicked' };
+    }
+
+	clickedUsers.push(socket.uid);
+    await db.setObjectField(`topic:${data.tid}`, 'sameQuestionUsers', JSON.stringify(clickedUsers));
+	
 	let currCount = await db.getObjectField(`topic:${data.tid}`, 'sameQuestionCount') || 0;
     currCount = parseInt(currCount, 10) + 1;
 	await db.setObjectField(`topic:${data.tid}`, 'sameQuestionCount', currCount);
