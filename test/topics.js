@@ -903,6 +903,10 @@ describe('Topic\'s', () => {
 		});
 	});
 
+	describe('resolved status', () => {
+
+	});
+
 
 	describe('.ignore', () => {
 		let newTid;

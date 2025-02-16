@@ -24,15 +24,17 @@ define('forum/topic/threadTools', [
 			}
 		});
 
+		const button = document.getElementById('sameQuestion');
+
 		socket.emit('topics.sameQuestionCount', { tid }, function (err, result) {
-            if (!err && result.success) {
-                document.getElementById('sameQuestionCount').textContent = result.sameQCount;
+			if (!err && result.success) {
+				document.getElementById('sameQuestionCount').textContent = result.sameQCount;
 				if (result.hasClicked) {
-                    button.disabled = true;
-                    button.classList.add('disabled');
+					button.disabled = true;
+					button.classList.add('disabled');
 				}
-            }
-        });
+			}
+		});
 
 		renderMenu(topicContainer);
 
