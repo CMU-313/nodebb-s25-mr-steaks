@@ -7,7 +7,6 @@ const posts = require('../posts');
 const topics = require('../topics');
 const user = require('../user');
 const meta = require('../meta');
-const privileges = require('../privileges');
 const cache = require('../cache');
 const events = require('../events');
 
@@ -42,10 +41,6 @@ SocketTopics.sameQuestionCount = async function (socket, data) {
 };
 
 SocketTopics.increaseSameQCount = async function (socket, data) {
-	const canRead = await privileges.topics.can('topics:read', data.tid, socket.uid);
-	if (!canRead) {
-		throw new Error('[[no-privileges]]');
-	}
 	let clickedUsers = await db.getObjectField(`topic:${data.tid}`, 'sameQuestionUsers') || '[]';
 	clickedUsers = JSON.parse(clickedUsers);
 
@@ -63,10 +58,6 @@ SocketTopics.increaseSameQCount = async function (socket, data) {
 };
 
 SocketTopics.postcount = async function (socket, tid) {
-	const canRead = await privileges.topics.can('topics:read', tid, socket.uid);
-	if (!canRead) {
-		throw new Error('[[no-privileges]]');
-	}
 	return await topics.getTopicField(tid, 'postcount');
 };
 

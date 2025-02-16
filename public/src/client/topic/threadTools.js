@@ -24,15 +24,9 @@ define('forum/topic/threadTools', [
 			}
 		});
 
-		const button = document.getElementById('sameQuestion');
-
 		socket.emit('topics.sameQuestionCount', { tid }, function (err, result) {
 			if (!err && result.success) {
 				document.getElementById('sameQuestionCount').textContent = result.sameQCount;
-				if (result.hasClicked) {
-					button.disabled = true;
-					button.classList.add('disabled');
-				}
 			}
 		});
 
@@ -177,8 +171,6 @@ define('forum/topic/threadTools', [
 			socket.emit('topics.increaseSameQCount', { tid }, function (err, result) {
 				if (!err && result.success) {
 					document.getElementById('sameQuestionCount').textContent = result.currCount;
-					button.disabled = true;
-					button.classList.add('disabled');
 				}
 			});
 		});
