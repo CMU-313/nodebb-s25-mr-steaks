@@ -971,7 +971,7 @@ describe('Topic\'s', () => {
 
 		it('should have correct updated count', async () => {
 			const result = await socketTopics.sameQuestionCount({ uid }, { tid: newTid });
-			assert.strictEqual(result.sameQCount, 1);
+			assert.strictEqual(Number(result.sameQCount), 1);
 			assert.strictEqual(result.hasClicked, true);
 			assert.strictEqual(result.success, true);
 		});
