@@ -139,4 +139,9 @@ function modifyTopic(topic, fields) {
 			};
 		});
 	}
+
+	//Ensure that anonymous field is a boolean
+	if (topic.hasOwnProperty('anonymous')) {
+        topic.anonymous = topic.anonymous === 'true' || topic.anonymous === true;
+    }
 }
