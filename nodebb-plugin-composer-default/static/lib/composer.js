@@ -717,7 +717,7 @@ define('composer', [
 
 		let composerData = {
 			uuid: post_uuid,
-			isAnonymous: postData.isAnonymous
+			isAnonymous: postData.isAnonymous, 
 		};
 		let method = 'post';
 		let route = '';
