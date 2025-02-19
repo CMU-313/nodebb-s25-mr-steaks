@@ -717,6 +717,7 @@ define('composer', [
 
 		let composerData = {
 			uuid: post_uuid,
+			isAnonymous: postData.isAnonymous,
 		};
 		let method = 'post';
 		let route = '';
@@ -808,7 +809,6 @@ define('composer', [
 				} else {
 					removeComposerHistory();
 				}
-
 				hooks.fire('action:composer.' + action, { composerData: composerData, data: data });
 			})
 			.catch((err) => {
