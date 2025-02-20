@@ -15,7 +15,7 @@
 4) Return to the original topic page to ensure the topic status persists as Resolved
 ### Automated testing
 **Location**:<br> 
-Automated tests for Resolved/Unresolved button located in tests/topic.js. Test suite name: 'resolved and unresolved topics'
+Automated tests for Resolved/Unresolved button located in tests/topic.js. Test suite name: 'resolved and unresolved topics'<br>
 **Description**:<br> 
 This new test suite checks that the initial state of a new post is set to Unresolved. It also tests that the Resolved and Unresolved states are being set correctly in the database and retrieved correctly from it.
 While users can test that the button UI visually reflects the stored database state, the automated tests should be sufficient to ensure that the resolved status in the database is being properly updated and that the state is being preserved. We test retrieving the resolved state immediately after setting it to ensure that the state persists.
@@ -40,7 +40,7 @@ Checking that the button works:
 3) Return to the original topic page to ensure that the Same Question count persists (is the same as the count before you navigated away) 
 ### Automated testing
 **Location**:<br> 
-Automated tests for Same Question button located in tests/topic.js. Test suite name: 'same question topics'
+Automated tests for Same Question button located in tests/topic.js. Test suite name: 'same question topics'<br>
 **Description**:<br>
 This new test suite checks that the count is initialized to 0, clicking the button increases the count by one, multiple users can increase the count, and one user cannot continually increase the count. We test the multiple users functionality by creating two test users, having the second user increase the count and seeing if the increase is reflected for the first user.
 While users can test that the button UI visually reflects the stored database count, the automated tests should be sufficient because we need to ensure that the same question count in the database is being properly updated and that the state is being preserved.
