@@ -903,6 +903,85 @@ describe('Topic\'s', () => {
 		});
 	});
 
+	describe('resolved and unresolved topics', () => {
+		let newTid;
+		let uid;
+		let newTopic;
+		before(async () => {
+			uid = topic.userId;
+			const result = await topics.post({ uid: topic.userId, title: 'Topic to be resolved', content: 'Just resolve me, please!', cid: topic.categoryId });
+			newTopic = result.topicData;
+			newTid = newTopic.tid;
+			await socketTopics.setResolved({ uid }, { tid: newTid, status: 'Unresolved' });
+		});
+
+		it('should set resolved state correctly', async () => {
+			const result = await socketTopics.setResolved({ uid }, { tid: newTid, status: 'Resolved' });
+			assert.strictEqual(result.resolved, 1);
+			assert.strictEqual(result.success, true);
+		});
+
+		it('should retrieve resolved state correctly', async () => {
+			const result = await socketTopics.getResolved({ uid }, { tid: newTid });
+			assert.strictEqual(result.resolved, true);
+			assert.strictEqual(result.success, true);
+		});
+
+		it('should set unresolved state correctly', async () => {
+			const result = await socketTopics.setResolved({ uid }, { tid: newTid, status: 'Unresolved' });
+			assert.strictEqual(result.resolved, 0);
+			assert.strictEqual(result.success, true);
+		});
+
+		it('should retrieve unresolved state correctly', async () => {
+			const result = await socketTopics.getResolved({ uid }, { tid: newTid });
+			assert.strictEqual(result.resolved, false);
+			assert.strictEqual(result.success, true);
+		});
+	});
+
+	describe('same question topics', () => {
+		let newTid;
+		let uid;
+		let newTopic;
+		let otherUserUid;
+		before(async () => {
+			uid = topic.userId;
+			const result = await topics.post({ uid: topic.userId, title: 'Topic with same question', content: 'Just increase my count, please!', cid: topic.categoryId });
+			newTopic = result.topicData;
+			newTid = newTopic.tid;
+			otherUserUid = await User.create({ username: 'regularJoe' });
+		});
+
+		it('should start with zero count', async () => {
+			const result = await socketTopics.sameQuestionCount({ uid }, { tid: newTid });
+			assert.strictEqual(result.sameQCount, 0);
+			assert.strictEqual(result.hasClicked, false);
+			assert.strictEqual(result.success, true);
+		});
+
+		it('should increase count by 1 when clicked, stopping same user from clicking many times', async () => {
+			const result = await socketTopics.increaseSameQCount({ uid }, { tid: newTid });
+			assert.strictEqual(result.currCount, 1);
+			assert.strictEqual(result.success, true);
+			const result2 = await socketTopics.increaseSameQCount({ uid }, { tid: newTid });
+			assert.strictEqual(result2.success, false);
+			assert.strictEqual(result2.message, 'Already clicked');
+		});
+
+		it('should have correct updated count', async () => {
+			const result = await socketTopics.sameQuestionCount({ uid }, { tid: newTid });
+			assert.strictEqual(Number(result.sameQCount), 1);
+			assert.strictEqual(result.hasClicked, true);
+			assert.strictEqual(result.success, true);
+		});
+
+		it('should allow other users to click and increase count', async () => {
+			const result = await socketTopics.increaseSameQCount({ uid: otherUserUid }, { tid: newTid });
+			assert.strictEqual(result.currCount, 2);
+			assert.strictEqual(result.success, true);
+		});
+	});
 
 	describe('.ignore', () => {
 		let newTid;
