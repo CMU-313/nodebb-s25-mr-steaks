@@ -11,7 +11,7 @@ const Sockets = module.exports;
 Sockets.push = async function (socket, pid) {
 	console.log(`[Sockets.push] Called with pid: ${pid}, uid: ${socket.uid}`);
 	// const canRead = await privileges.posts.can('topics:read', pid, socket.uid);
-	//guests have perms
+	// guests have perms
 	const canRead = await privileges.posts.can('topics:read', pid, socket.uid) || socket.uid === 0;
 
 	if (!canRead) {
@@ -78,9 +78,9 @@ Sockets.shouldQueue = async function (socket, data) {
 		throw new Error('[[error:invalid-data]]');
 	}
 	// if (socket.uid <= 0) {
-	// 	return false;
+	// return false;
 	// }
-	//Allows anonymous to post
+	// Allows anonymous to post
 	const isAnonymous = data.postData.isAnonymous === true || data.postData.isAnonymous === 'true';
 	if (!socket.uid && !isAnonymous) {
 		return false;

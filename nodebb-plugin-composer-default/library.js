@@ -161,10 +161,10 @@ plugin.filterComposerBuild = async function (hookData) {
 	// ADD THIS ANONYMOUS CHECK HERE
 	const isAnonymous = req.query.anonymous === '1' || postData.isAnonymous === true || postData.isAnonymous === 'true';
 	postData.isAnonymous = isAnonymous;
-	
+
 	if (isAnonymous) {
 		postData.uid = 0; // Assign post to guest user
-		console.log("Anonymous post detected!");
+		console.log('Anonymous post detected!');
 	}
 
 	const isEditing = !!req.query.pid;

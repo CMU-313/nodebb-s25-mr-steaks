@@ -129,12 +129,12 @@ Topics.getTopicsByTids = async function (tids, options) {
 		if (topic) {
 			topic.thumbs = result.thumbs[i];
 			topic.category = result.categoriesMap[topic.cid];
-        // If topic is anonymous, set user to "Anonymous"
+			// If topic is anonymous, set user to "Anonymous"
 			if (topic.anonymous) {
-				console.log(topic.anonymous);
+				// console.log(topic.anonymous);
 				topic.user = {
 					uid: 0,
-					username: "Anonymous",
+					username: 'Anonymous',
 					userslug: null,
 					picture: null,
 				};
@@ -143,16 +143,16 @@ Topics.getTopicsByTids = async function (tids, options) {
 			}
 
 			// if (topic.anonymous === true || topic.anonymous === 'true') {
-			// 	console.log("Anonymous post detected:", topic.anonymous);
-			// 	topic.user = {
-			// 		uid: 0,
-			// 		username: "Anonymous",
-			// 		userslug: null,
-			// 		picture: null,
-			// 	};
+			// console.log("Anonymous post detected:", topic.anonymous);
+			// topic.user = {
+			// uid: 0,
+			// username: "Anonymous",
+			// userslug: null,
+			// picture: null,
+			// };
 			// } else {
-			// 	console.log("Anonymous post not detected:", topic.anonymous);
-			// 	topic.user = topic.uid ? result.usersMap[topic.uid] : { ...result.usersMap[topic.uid] };
+			// console.log("Anonymous post not detected:", topic.anonymous);
+			// topic.user = topic.uid ? result.usersMap[topic.uid] : { ...result.usersMap[topic.uid] };
 			// }
 
 			// topic.user = topic.uid ? result.usersMap[topic.uid] : { ...result.usersMap[topic.uid] };
