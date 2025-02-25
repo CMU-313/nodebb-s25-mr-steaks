@@ -9,7 +9,11 @@ const plugins = require.main.require('./src/plugins');
 const Sockets = module.exports;
 
 Sockets.push = async function (socket, pid) {
-	const canRead = await privileges.posts.can('topics:read', pid, socket.uid);
+	console.log(`[Sockets.push] Called with pid: ${pid}, uid: ${socket.uid}`);
+	// const canRead = await privileges.posts.can('topics:read', pid, socket.uid);
+	// guests have perms
+	const canRead = await privileges.posts.can('topics:read', pid, socket.uid) || socket.uid === 0;
+
 	if (!canRead) {
 		throw new Error('[[error:no-privileges]]');
 	}
@@ -76,7 +80,6 @@ Sockets.shouldQueue = async function (socket, data) {
 	if (socket.uid <= 0) {
 		return false;
 	}
-
 	let shouldQueue = false;
 	const { postData } = data;
 	if (postData.action === 'posts.reply') {
