@@ -77,15 +77,9 @@ Sockets.shouldQueue = async function (socket, data) {
 	if (!data || !data.postData) {
 		throw new Error('[[error:invalid-data]]');
 	}
-	// if (socket.uid <= 0) {
-	// return false;
-	// }
-	// Allows anonymous to post
-	const isAnonymous = data.postData.isAnonymous === true || data.postData.isAnonymous === 'true';
-	if (!socket.uid && !isAnonymous) {
+	if (socket.uid <= 0) {
 		return false;
 	}
-
 	let shouldQueue = false;
 	const { postData } = data;
 	if (postData.action === 'posts.reply') {
