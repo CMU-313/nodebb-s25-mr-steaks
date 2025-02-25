@@ -38,7 +38,7 @@ SocketTopics.sameQuestionCount = async function (socket, data) {
 	clickedUsers = JSON.parse(clickedUsers);
 	const hasClicked = clickedUsers.includes(socket.uid);
 	return { success: true, sameQCount, hasClicked };
-}
+};
 
 SocketTopics.increaseSameQCount = async function (socket, data) {
 	let clickedUsers = await db.getObjectField(`topic:${data.tid}`, 'sameQuestionUsers') || '[]';
