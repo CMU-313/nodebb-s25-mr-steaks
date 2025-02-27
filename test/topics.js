@@ -82,17 +82,14 @@ describe('Topic\'s', () => {
 				name: 'Anonymous Test Category',
 				description: 'Category for anonymous topic tests',
 			});
-		
 			// Ensure anonymous posting is enabled
 			await privileges.categories.give(['groups:topics:create'], categoryObj.cid, 'guests');
-		
 			const result = await topics.post({
 				uid: 0, // Anonymous user
 				title: 'Anonymous Test Topic',
 				content: 'This is a test post from an anonymous user.',
 				cid: categoryObj.cid,
 			});
-		
 			assert(result);
 			assert.strictEqual(result.topicData.title, 'Anonymous Test Topic');
 			console.log('DEBUG:', result.topicData.user.username); // Check what username is actually returned
