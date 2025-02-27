@@ -77,6 +77,28 @@ describe('Topic\'s', () => {
 			});
 		});
 
+		it('should create a new topic as an anonymous user', async () => {
+			const categoryObj = await categories.create({
+				name: 'Anonymous Test Category',
+				description: 'Category for anonymous topic tests',
+			});
+		
+			// Ensure anonymous posting is enabled
+			await privileges.categories.give(['groups:topics:create'], categoryObj.cid, 'guests');
+		
+			const result = await topics.post({
+				uid: 0, // Anonymous user
+				title: 'Anonymous Test Topic',
+				content: 'This is a test post from an anonymous user.',
+				cid: categoryObj.cid,
+			});
+		
+			assert(result);
+			assert.strictEqual(result.topicData.title, 'Anonymous Test Topic');
+			console.log('DEBUG:', result.topicData.user.username); // Check what username is actually returned
+			assert.strictEqual(result.topicData.user.username, '[[global:guest]]'); // Adjust if necessary
+		});
+
 		it('should get post count', async () => {
 			const count = await socketTopics.postcount({ uid: adminUid }, topic.tid);
 			assert.strictEqual(count, 1);
