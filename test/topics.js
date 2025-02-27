@@ -121,6 +121,31 @@ describe('Topic\'s', () => {
 			assert.strictEqual(topicData.user.picture, null);
 		});
 
+		it('should create a new topic as an anonymous user', async () => {
+			const categoryObj = await categories.create({
+				name: 'Anonymous Test Category',
+				description: 'Category for anonymous topic tests',
+			});
+			// Ensure anonymous posting is enabled
+			await privileges.categories.give(['groups:topics:create'], categoryObj.cid, 'guests');
+			// Create the topic as an anonymous user
+			const result = await topics.post({
+				uid: 0, // Anonymous user
+				title: 'Anonymous Test Topic',
+				content: 'This is a test post from an anonymous user.',
+				cid: categoryObj.cid,
+				anonymous: true, // Ensure this is explicitly set
+			});
+			// Defensive checks to avoid undefined property errors
+			assert(result, 'Expected a result from topics.post');
+			assert(result.topicData, 'Expected result to contain topicData');
+			assert.strictEqual(result.topicData.title, 'Anonymous Test Topic');
+			// Verify if the user object exists before accessing properties
+			assert(result.topicData.user, 'Expected topicData to contain a user object');
+			assert.strictEqual(result.topicData.user.uid, 0, 'User UID should be 0 for anonymous users');
+			assert.strictEqual(result.topicData.user.username, '[[global:guest]]', 'Username should be [[global:guest]] for anonymous users');
+		});
+
 		it('should get post count', async () => {
 			const count = await socketTopics.postcount({ uid: adminUid }, topic.tid);
 			assert.strictEqual(count, 1);
