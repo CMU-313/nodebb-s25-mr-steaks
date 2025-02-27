@@ -104,9 +104,9 @@ describe('Topic\'s', () => {
 			topicData.anonymous = true;
 			assert.strictEqual(topicData.anonymous === 'true' || topicData.anonymous === true, true);
 		});
-	
+
 		it('should assign anonymous user data if topic is anonymous', async () => {
-			const topicData = { anonymous: true };	
+			const topicData = { anonymous: true };
 			if (topicData.anonymous) {
 				topicData.user = {
 					uid: 0,
