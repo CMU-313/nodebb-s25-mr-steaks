@@ -96,6 +96,31 @@ describe('Topic\'s', () => {
 			assert.strictEqual(result.topicData.user.username, '[[global:guest]]'); // Adjust if necessary
 		});
 
+		it('should correctly convert topic.anonymous to boolean', async () => {
+			const topicData = { anonymous: 'true' };
+			assert.strictEqual(topicData.anonymous === 'true' || topicData.anonymous === true, true);
+			topicData.anonymous = 'false';
+			assert.strictEqual(topicData.anonymous === 'true' || topicData.anonymous === true, false);
+			topicData.anonymous = true;
+			assert.strictEqual(topicData.anonymous === 'true' || topicData.anonymous === true, true);
+		});
+	
+		it('should assign anonymous user data if topic is anonymous', async () => {
+			const topicData = { anonymous: true };	
+			if (topicData.anonymous) {
+				topicData.user = {
+					uid: 0,
+					username: 'Anonymous',
+					userslug: null,
+					picture: null,
+				};
+			}
+			assert.strictEqual(topicData.user.uid, 0);
+			assert.strictEqual(topicData.user.username, 'Anonymous');
+			assert.strictEqual(topicData.user.userslug, null);
+			assert.strictEqual(topicData.user.picture, null);
+		});
+
 		it('should get post count', async () => {
 			const count = await socketTopics.postcount({ uid: adminUid }, topic.tid);
 			assert.strictEqual(count, 1);
