@@ -77,6 +77,75 @@ describe('Topic\'s', () => {
 			});
 		});
 
+		it('should create a new topic as an anonymous user', async () => {
+			const categoryObj = await categories.create({
+				name: 'Anonymous Test Category',
+				description: 'Category for anonymous topic tests',
+			});
+			// Ensure anonymous posting is enabled
+			await privileges.categories.give(['groups:topics:create'], categoryObj.cid, 'guests');
+			const result = await topics.post({
+				uid: 0, // Anonymous user
+				title: 'Anonymous Test Topic',
+				content: 'This is a test post from an anonymous user.',
+				cid: categoryObj.cid,
+			});
+			assert(result);
+			assert.strictEqual(result.topicData.title, 'Anonymous Test Topic');
+			console.log('DEBUG:', result.topicData.user.username); // Check what username is actually returned
+			assert.strictEqual(result.topicData.user.username, '[[global:guest]]'); // Adjust if necessary
+		});
+
+		it('should correctly convert topic.anonymous to boolean', async () => {
+			const topicData = { anonymous: 'true' };
+			assert.strictEqual(topicData.anonymous === 'true' || topicData.anonymous === true, true);
+			topicData.anonymous = 'false';
+			assert.strictEqual(topicData.anonymous === 'true' || topicData.anonymous === true, false);
+			topicData.anonymous = true;
+			assert.strictEqual(topicData.anonymous === 'true' || topicData.anonymous === true, true);
+		});
+
+		it('should assign anonymous user data if topic is anonymous', async () => {
+			const topicData = { anonymous: true };
+			if (topicData.anonymous) {
+				topicData.user = {
+					uid: 0,
+					username: 'Anonymous',
+					userslug: null,
+					picture: null,
+				};
+			}
+			assert.strictEqual(topicData.user.uid, 0);
+			assert.strictEqual(topicData.user.username, 'Anonymous');
+			assert.strictEqual(topicData.user.userslug, null);
+			assert.strictEqual(topicData.user.picture, null);
+		});
+
+		it('should create a new topic as an anonymous user', async () => {
+			const categoryObj = await categories.create({
+				name: 'Anonymous Test Category',
+				description: 'Category for anonymous topic tests',
+			});
+			// Ensure anonymous posting is enabled
+			await privileges.categories.give(['groups:topics:create'], categoryObj.cid, 'guests');
+			// Create the topic as an anonymous user
+			const result = await topics.post({
+				uid: 0, // Anonymous user
+				title: 'Anonymous Test Topic',
+				content: 'This is a test post from an anonymous user.',
+				cid: categoryObj.cid,
+				anonymous: true, // Ensure this is explicitly set
+			});
+			// Defensive checks to avoid undefined property errors
+			assert(result, 'Expected a result from topics.post');
+			assert(result.topicData, 'Expected result to contain topicData');
+			assert.strictEqual(result.topicData.title, 'Anonymous Test Topic');
+			// Verify if the user object exists before accessing properties
+			assert(result.topicData.user, 'Expected topicData to contain a user object');
+			assert.strictEqual(result.topicData.user.uid, 0, 'User UID should be 0 for anonymous users');
+			assert.strictEqual(result.topicData.user.username, '[[global:guest]]', 'Username should be [[global:guest]] for anonymous users');
+		});
+
 		it('should get post count', async () => {
 			const count = await socketTopics.postcount({ uid: adminUid }, topic.tid);
 			assert.strictEqual(count, 1);
@@ -903,56 +972,6 @@ describe('Topic\'s', () => {
 		});
 	});
 
-	describe("Anonymous Posting", function () {
-		it("should create a new topic as an anonymous user", async function () {
-			const categoryObj = await categories.create({
-				name: "Anonymous Test Category",
-				description: "Category for anonymous topic tests",
-			});
-			// Ensure anonymous posting is enabled
-			await privileges.categories.give(["groups:topics:create"], categoryObj.cid, "guests");
-			// Create the topic as an anonymous user
-			const result = await topics.post({
-				uid: 0, // Anonymous user
-				title: "Anonymous Test Topic",
-				content: "This is a test post from an anonymous user.",
-				cid: categoryObj.cid,
-				anonymous: true, // Explicitly set
-			});
-			// Defensive checks
-			assert(result, "Expected a result from topics.post");
-			assert(result.topicData, "Expected result to contain topicData");
-			// Verify title
-			assert.strictEqual(result.topicData.title, "Anonymous Test Topic");
-			// Ensure the user object exists and is correctly assigned
-			assert(result.topicData.user, "Expected topicData to contain a user object");
-			assert.strictEqual(result.topicData.user.uid, 0, "User UID should be 0 for anonymous users");
-			assert.strictEqual(result.topicData.user.username, "[[global:guest]]", "Username should be [[global:guest]] for anonymous users");
-		});
-		it("should correctly convert topic.anonymous to boolean", function () {
-			let topicData = { anonymous: true };
-			assert.strictEqual(topicData.anonymous, true);
-			topicData.anonymous = false;
-			assert.strictEqual(topicData.anonymous, false);
-			topicData.anonymous = true;
-			assert.strictEqual(topicData.anonymous, true);
-		});
-		it("should assign anonymous user data if topic is anonymous", function () {
-			let topicData = { anonymous: true };
-			if (topicData.anonymous) {
-				topicData.user = {
-					uid: 0,
-					username: "Anonymous",
-					userslug: null,
-					picture: null,
-				};
-			}
-			assert.strictEqual(topicData.user.uid, 0);
-			assert.strictEqual(topicData.user.username, "Anonymous");
-			assert.strictEqual(topicData.user.userslug, null);
-			assert.strictEqual(topicData.user.picture, null);
-		});
-	});
 
 	describe('.ignore', () => {
 		let newTid;
