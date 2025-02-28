@@ -71,7 +71,7 @@ Checking that you can still post with your name:
 
 ### Automated testing
 **Location**:<br> 
-Automated tests for anonymous posting located in tests/topic.js. Test suite name: 'Anonymous Posting'
+Automated tests for anonymous posting located in tests/topic.js. Under test suite: '.post'
 
 **Description**:<br>
-This new test suite first makes sure that a user can choose to post anonymously and can successfully create a topic. Then, we test to make sure thatm for that topic, the username is "Anonymous" and the profile picture is blank as intended. Tests then ensure that this anonymous field is actually a boolean, changing it between true and false to make sure that the behavior is as intended. We make sure that their uid for the topic is set to 0, indicating an anonymous topic post, and finally make sure that their actual user data does not get modified, anonymous or not. 
+This new test suite first makes sure that a user can choose to post anonymously and can successfully create a topic. Then, we test to make sure that for that topic, the username is "Anonymous" and the profile picture is blank as intended. Tests then ensure that this anonymous field is actually a boolean, changing it between true and false to make sure that the behavior is as intended. We make sure that their uid for the topic is set to 0, indicating an anonymous topic post, and finally make sure that their actual user data does not get modified, anonymous or not. 
