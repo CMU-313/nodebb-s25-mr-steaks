@@ -21,10 +21,12 @@ module.exports = function (Topics) {
 		const timestamp = data.timestamp || Date.now();
 
 		const tid = await db.incrObjectField('global', 'nextTid');
+		console.log(`Creating topic with TID: ${tid}, Anonymous: ${data.isAnonymous}, UID: ${data.uid}`);
 
 		let topicData = {
 			tid: tid,
-			uid: data.uid,
+			// uid: data.uid,
+			uid: data.isAnonymous ? 0 : data.uid,
 			cid: data.cid,
 			mainPid: 0,
 			title: data.title,
@@ -33,7 +35,7 @@ module.exports = function (Topics) {
 			lastposttime: 0,
 			postcount: 0,
 			viewcount: 0,
-			isAnonymous: data.isAnonymous,
+			anonymous: data.isAnonymous,
 		};
 
 		if (Array.isArray(data.tags) && data.tags.length) {
