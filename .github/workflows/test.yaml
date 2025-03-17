@@ -77,6 +77,9 @@ jobs:
         run: |
           node app --setup="${SETUP}" --ci="${CI}"
 
+      - name: Run Prettier Check
+        run: npx prettier --check "src/**/*.js"
+      
       - name: Run ESLint
         run: npm run lint
 
