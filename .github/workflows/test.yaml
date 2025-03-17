@@ -77,11 +77,14 @@ jobs:
         run: |
           node app --setup="${SETUP}" --ci="${CI}"
 
+      - name: Run Prettier
+        run: npx prettier --write "**/*.js" --ignore-path .prettierignore
+
+      - name: Fix any Prettier-Linter conflicts
+        run: npx eslint . --fix
+
       - name: Run ESLint
         run: npm run lint
-
-      - name: Run Prettier
-        run: npx prettier --check "**/*.js"
 
       - name: Node tests
         run: npm test
