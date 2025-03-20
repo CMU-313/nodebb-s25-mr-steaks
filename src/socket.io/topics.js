@@ -33,15 +33,18 @@ SocketTopics.getResolved = async function (socket, data) {
 };
 
 SocketTopics.sameQuestionCount = async function (socket, data) {
-	const sameQCount = await db.getObjectField(`topic:${data.tid}`, 'sameQuestionCount') || 0;
-	let clickedUsers = await db.getObjectField(`topic:${data.tid}`, 'sameQuestionUsers') || '[]';
+	const sameQCount =
+		(await db.getObjectField(`topic:${data.tid}`, 'sameQuestionCount')) || 0;
+	let clickedUsers =
+		(await db.getObjectField(`topic:${data.tid}`, 'sameQuestionUsers')) || '[]';
 	clickedUsers = JSON.parse(clickedUsers);
 	const hasClicked = clickedUsers.includes(socket.uid);
 	return { success: true, sameQCount, hasClicked };
 };
 
 SocketTopics.increaseSameQCount = async function (socket, data) {
-	let clickedUsers = await db.getObjectField(`topic:${data.tid}`, 'sameQuestionUsers') || '[]';
+	let clickedUsers =
+		(await db.getObjectField(`topic:${data.tid}`, 'sameQuestionUsers')) || '[]';
 	clickedUsers = JSON.parse(clickedUsers);
 
 	if (clickedUsers.includes(socket.uid)) {
@@ -49,9 +52,14 @@ SocketTopics.increaseSameQCount = async function (socket, data) {
 	}
 
 	clickedUsers.push(socket.uid);
-	await db.setObjectField(`topic:${data.tid}`, 'sameQuestionUsers', JSON.stringify(clickedUsers));
+	await db.setObjectField(
+		`topic:${data.tid}`,
+		'sameQuestionUsers',
+		JSON.stringify(clickedUsers),
+	);
 
-	let currCount = await db.getObjectField(`topic:${data.tid}`, 'sameQuestionCount') || 0;
+	let currCount =
+		(await db.getObjectField(`topic:${data.tid}`, 'sameQuestionCount')) || 0;
 	currCount = parseInt(currCount, 10) + 1;
 	await db.setObjectField(`topic:${data.tid}`, 'sameQuestionCount', currCount);
 	return { success: true, currCount };
@@ -70,9 +78,19 @@ SocketTopics.bookmark = async function (socket, data) {
 		throw new Error('[[error:invalid-data]]');
 	}
 	const postcount = await topics.getTopicField(data.tid, 'postcount');
-	if (data.index > meta.config.bookmarkThreshold && postcount > meta.config.bookmarkThreshold) {
-		const currentIndex = await db.sortedSetScore(`tid:${data.tid}:bookmarks`, socket.uid);
-		if (!currentIndex || (data.index > currentIndex && data.index <= postcount) || (currentIndex > postcount)) {
+	if (
+		data.index > meta.config.bookmarkThreshold &&
+		postcount > meta.config.bookmarkThreshold
+	) {
+		const currentIndex = await db.sortedSetScore(
+			`tid:${data.tid}:bookmarks`,
+			socket.uid,
+		);
+		if (
+			!currentIndex ||
+			(data.index > currentIndex && data.index <= postcount) ||
+			currentIndex > postcount
+		) {
 			await topics.setUserBookmark(data.tid, socket.uid, data.index);
 		}
 	}
@@ -87,7 +105,13 @@ SocketTopics.createTopicFromPosts = async function (socket, data) {
 		throw new Error('[[error:invalid-data]]');
 	}
 
-	const result = await topics.createTopicFromPosts(socket.uid, data.title, data.pids, data.fromTid, data.cid);
+	const result = await topics.createTopicFromPosts(
+		socket.uid,
+		data.title,
+		data.pids,
+		data.fromTid,
+		data.cid,
+	);
 	await events.log({
 		type: `topic-fork`,
 		uid: socket.uid,
@@ -115,14 +139,20 @@ SocketTopics.getMyNextPostIndex = async function (socket, data) {
 	}
 
 	async function getTopicPids(index) {
-		const topicSet = data.sort === 'most_votes' ? `tid:${data.tid}:posts:votes` : `tid:${data.tid}:posts`;
-		const reverse = data.sort === 'newest_to_oldest' || data.sort === 'most_votes';
+		const topicSet =
+			data.sort === 'most_votes'
+				? `tid:${data.tid}:posts:votes`
+				: `tid:${data.tid}:posts`;
+		const reverse =
+			data.sort === 'newest_to_oldest' || data.sort === 'most_votes';
 		const cacheKey = `np:s:${topicSet}:r:${String(reverse)}:tid:${data.tid}:pids`;
 		const topicPids = cache.get(cacheKey);
 		if (topicPids) {
 			return topicPids.slice(index - 1);
 		}
-		const pids = await db[reverse ? 'getSortedSetRevRange' : 'getSortedSetRange'](topicSet, 0, -1);
+		const pids = await db[
+			reverse ? 'getSortedSetRevRange' : 'getSortedSetRange'
+		](topicSet, 0, -1);
 		cache.set(cacheKey, pids, 30000);
 		return pids.slice(index - 1);
 	}
@@ -134,11 +164,18 @@ SocketTopics.getMyNextPostIndex = async function (socket, data) {
 		if (userPids) {
 			return userPids;
 		}
-		const pids = await db.getSortedSetRange(`cid:${cid}:uid:${socket.uid}:pids`, 0, -1);
+		const pids = await db.getSortedSetRange(
+			`cid:${cid}:uid:${socket.uid}:pids`,
+			0,
+			-1,
+		);
 		cache.set(cacheKey, pids, 30000);
 		return pids;
 	}
-	const postCountInTopic = await db.sortedSetScore(`tid:${data.tid}:posters`, socket.uid);
+	const postCountInTopic = await db.sortedSetScore(
+		`tid:${data.tid}:posters`,
+		socket.uid,
+	);
 	if (postCountInTopic <= 0) {
 		return 0;
 	}
@@ -150,7 +187,10 @@ SocketTopics.getMyNextPostIndex = async function (socket, data) {
 	if (!userPidsInTopic.length) {
 		if (postCountInTopic > 0) {
 			// wrap around to beginning
-			const wrapIndex = await SocketTopics.getMyNextPostIndex(socket, { ...data, index: 1 });
+			const wrapIndex = await SocketTopics.getMyNextPostIndex(socket, {
+				...data,
+				index: 1,
+			});
 			return wrapIndex;
 		}
 		return 0;
