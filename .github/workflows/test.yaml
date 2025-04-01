@@ -76,7 +76,13 @@ jobs:
             }
         run: |
           node app --setup="${SETUP}" --ci="${CI}"
-      
+
+      - name: integrate prettier with linter
+        run: npm i -D eslint-config-prettier
+
+      # - name: Run Prettier Check
+      #   run: npx prettier --check "src/**/*.js"
+
       - name: Run ESLint
         run: npm run lint
 
