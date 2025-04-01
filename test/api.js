@@ -660,12 +660,12 @@ describe('API', async () => {
 		});
 
 		// Compare the response to the schema
-		Object.keys(response).forEach((prop) => {
-			if (additionalProperties) { // All bets are off
-				return;
-			}
+		// Object.keys(response).forEach((prop) => {
+		// 	if (additionalProperties) { // All bets are off
+				
+		// 	}
 
-			// assert(schema[prop], `"${prop}" was found in response, but is not defined in schema (path: ${method} ${path}, context: ${context})`);
-		});
+		// 	// assert(schema[prop], `"${prop}" was found in response, but is not defined in schema (path: ${method} ${path}, context: ${context})`);
+		// });
 	}
 });
